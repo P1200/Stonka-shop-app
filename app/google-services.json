@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "228146983256",
+    "project_id": "stonka-shop-app",
+    "storage_bucket": "stonka-shop-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228146983256:android:2814d8fa96b25d3d30752d",
+        "android_client_info": {
+          "package_name": "com.stonka.shopapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmwYsBuaDpuhW0ZG2e4UFMx-0MoQpoY-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
