@@ -12,14 +12,38 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.stonka.shopapp.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_shakeomat"
+        android:name="com.stonka.shopapp.ui.shakeomat.ShakeomatFragment"
+        android:label="@string/title_shakeomat"
+        tools:layout="@layout/fragment_shakeomat" />
+
+    <fragment
+        android:id="@+id/navigation_account"
+        android:name="com.stonka.shopapp.ui.account.AccountFragment"
+        android:label="@string/title_account"
+        tools:layout="@layout/fragment_notifications" />
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.stonka.shopapp.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.stonka.shopapp.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.stonka.shopapp.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register" />
+
+    <fragment
+        android:id="@+id/resetPasswordFragment"
+        android:name="com.stonka.shopapp.ResetPasswordFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_reset_password" />
 </navigation>

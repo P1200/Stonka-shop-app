@@ -2,33 +2,42 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="20dp"
+    tools:context=".RegisterFragment">
 
     <EditText
         android:id="@+id/nameRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Imię" />
+        android:autofillHints="true"
+        android:hint="Imię"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/birthDateRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints="true"
         android:hint="Data urodzenia (DD-MM-YYYY)"
         android:focusable="false"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:inputType="date" />
 
     <EditText
         android:id="@+id/emailRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"/>
+        android:autofillHints="true"
+        android:hint="Email"
+        android:inputType="textEmailAddress" />
 
     <EditText
         android:id="@+id/passwordRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints="false"
         android:hint="Hasło"
         android:inputType="textPassword"/>
 
