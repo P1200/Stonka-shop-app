@@ -14,8 +14,8 @@
             android:id="@+id/product_image"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_launcher_foreground"
-            android:scaleType="centerCrop"/>
+            android:src="@drawable/baseline_crop_original_24"
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
                 android:id="@+id/product_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="99.99 zł"
+                android:text="cena zł"
                 android:textSize="16sp"/>
         </LinearLayout>
     </LinearLayout>

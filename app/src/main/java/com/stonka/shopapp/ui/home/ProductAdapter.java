@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    private List<Product> productList;
+    private final List<Product> productList;
 
     public ProductAdapter(List<Product> productList) {
         this.productList = productList;
@@ -31,7 +31,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Product product = productList.get(position);
         holder.nameTextView.setText(product.getName());
         holder.priceTextView.setText(String.format("%.2f zł", product.getPrice()));
-        holder.productImageView.setImageResource(product.getImageResource());
+        holder.productImageView
+                .setImageResource(R.drawable.baseline_crop_original_24); // mock of image
     }
 
     @Override
