@@ -1,25 +1,23 @@
 package com.stonka.shopapp.ui.home;
 import com.stonka.shopapp.databinding.FragmentHomeBinding;
+
+import android.content.ContentValues;
 import android.graphics.pdf.PdfDocument;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,18 +28,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
 
     private static final int PAGE_SIZE = 5;
-    private static final String TAG = "HomeFragment"; // Ustal TAG dla logów
     private final List<Product> productList = new ArrayList<>();
     private FragmentHomeBinding binding;
     private RecyclerView recyclerView;
@@ -64,9 +59,7 @@ public class HomeFragment extends Fragment {
         adapter = new ProductAdapter(productList);
         recyclerView.setAdapter(adapter);
 
-        // Dodajemy logi przy kliknięciu przycisku
         binding.btnDownloadPdf.setOnClickListener(v -> {
-            Log.d(TAG, "Przycisk 'Pobierz PDF' kliknięty");
             generateProductCatalogPDF();
         });
 
@@ -153,37 +146,35 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean isGranted) {
-                    if (isGranted) {
-                        // Użytkownik przyznał uprawnienia
-                        Log.d(TAG, "Uprawnienia przyznane.");
-                        generateProductCatalogPDF();  // Uruchom generowanie PDF
-                    } else {
-                        // Użytkownik odmówił uprawnień
-                        Log.d(TAG, "Uprawnienia odrzucone.");
-                        Toast.makeText(getContext(), "Nie masz uprawnień do zapisu na dysku.", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
     private void generateProductCatalogPDF() {
-        Log.d(TAG, "Rozpoczęcie generowania PDF");
 
-        // Sprawdzenie, czy uprawnienie jest przyznane
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+        PdfDocument pdfDocument = getPdfDocument();
 
-            Log.d(TAG, "Brak uprawnień do zapisu, żądanie uprawnień");
-            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            return;
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, "gazetka.pdf");
+        values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        Uri uri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            uri = requireContext().getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
         }
 
-        Log.d(TAG, "Uprawnienia do zapisu zostały przyznane");
+        try {
+            OutputStream outputStream = requireContext().getContentResolver().openOutputStream(uri);
+            pdfDocument.writeTo(outputStream);
+            outputStream.close();
 
-        // Rozpoczynanie generowania PDF
+            Toast.makeText(getContext(), "PDF zapisany w Download", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(getContext(), "Błąd zapisu PDF!", Toast.LENGTH_SHORT).show();
+        }
+
+        pdfDocument.close();
+    }
+
+    @NonNull
+    private PdfDocument getPdfDocument() {
         PdfDocument pdfDocument = new PdfDocument();
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(300, 400, 1).create();
         PdfDocument.Page page = pdfDocument.startPage(pageInfo);
@@ -193,26 +184,14 @@ public class HomeFragment extends Fragment {
         int y = 20;
         paint.setTextSize(12);
 
-        // Wypełnianie PDF listą produktów
         for (Product product : productList) {
             canvas.drawText("Produkt: " + product.getName(), 10, y, paint);
             canvas.drawText("Cena: " + product.getPrice() + " PLN", 10, y + 15, paint);
             y += 40;
-            if (y > 380) break;  // W przypadku za dużej liczby produktów, zaczynaj nową stronę
+            if (y > 380) break;
         }
 
         pdfDocument.finishPage(page);
-
-        // Zapis do pliku PDF
-        File pdfFile = new File(requireContext().getExternalFilesDir(null), "gazetka1.pdf");
-        try {
-            pdfDocument.writeTo(new FileOutputStream(pdfFile));
-            Log.d(TAG, "PDF zapisany: " + pdfFile.getAbsolutePath()); // Log po zapisaniu PDF
-            Toast.makeText(getContext(), "PDF zapisany: " + pdfFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            Log.e(TAG, "Błąd zapisu PDF: " + e.getMessage()); // Log w przypadku błędu zapisu
-            Toast.makeText(getContext(), "Błąd zapisu PDF!", Toast.LENGTH_SHORT).show();
-        }
-        pdfDocument.close();
+        return pdfDocument;
     }
 }
