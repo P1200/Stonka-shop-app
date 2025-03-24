@@ -1,10 +1,22 @@
 package com.stonka.shopapp.ui.home;
+import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
+import android.content.ContentValues;
+import android.graphics.pdf.PdfDocument;
+
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,8 +28,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +43,13 @@ public class HomeFragment extends Fragment {
     private ProductAdapter adapter;
     private boolean isLoading = false;
     private boolean isLastPage = false;
+
     private String lastKey = null;
     private DatabaseReference databaseReference;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -44,6 +58,10 @@ public class HomeFragment extends Fragment {
 
         adapter = new ProductAdapter(productList);
         recyclerView.setAdapter(adapter);
+
+        binding.btnDownloadPdf.setOnClickListener(v -> {
+            generateProductCatalogPDF();
+        });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -68,10 +86,12 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+
         loadMoreProducts(); //Load first page
 
         return root;
     }
+
 
     @Override
     public void onDestroyView() {
@@ -84,7 +104,7 @@ public class HomeFragment extends Fragment {
         isLoading = true;
         databaseReference =
                 FirebaseDatabase.getInstance("https://stonka-shop-app-default-rtdb.europe-west1.firebasedatabase.app/")
-                                .getReference("products");
+                        .getReference("products");
 
         Query query;
         if (lastKey == null) {
@@ -124,5 +144,54 @@ public class HomeFragment extends Fragment {
                 isLoading = false;
             }
         });
+    }
+
+    private void generateProductCatalogPDF() {
+
+        PdfDocument pdfDocument = getPdfDocument();
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Downloads.DISPLAY_NAME, "gazetka.pdf");
+        values.put(MediaStore.Downloads.MIME_TYPE, "application/pdf");
+        values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+        Uri uri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            uri = requireContext().getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+        }
+
+        try {
+            OutputStream outputStream = requireContext().getContentResolver().openOutputStream(uri);
+            pdfDocument.writeTo(outputStream);
+            outputStream.close();
+
+            Toast.makeText(getContext(), "PDF zapisany w Download", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(getContext(), "Błąd zapisu PDF!", Toast.LENGTH_SHORT).show();
+        }
+
+        pdfDocument.close();
+    }
+
+    @NonNull
+    private PdfDocument getPdfDocument() {
+        PdfDocument pdfDocument = new PdfDocument();
+        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(300, 400, 1).create();
+        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
+        Canvas canvas = page.getCanvas();
+        Paint paint = new Paint();
+
+        int y = 20;
+        paint.setTextSize(12);
+
+        for (Product product : productList) {
+            canvas.drawText("Produkt: " + product.getName(), 10, y, paint);
+            canvas.drawText("Cena: " + product.getPrice() + " PLN", 10, y + 15, paint);
+            y += 40;
+            if (y > 380) break;
+        }
+
+        pdfDocument.finishPage(page);
+        return pdfDocument;
     }
 }
