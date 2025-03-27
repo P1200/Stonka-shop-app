@@ -50,4 +50,7 @@ dependencies {
     implementation libs.facebook.android.sdk
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.database
+
+    implementation libs.osmdroid.android
+    implementation libs.osmbonuspack
 }

@@ -3,6 +3,7 @@
     <string name="product_list">List of products</string>
     <string name="title_home">Home</string>
     <string name="title_shakeomat">Shakeomat</string>
+    <string name="title_favorite_store">Favorite store</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_account">Account</string>
     <string name="btn_download_pdf">Pobierz PDF</string>

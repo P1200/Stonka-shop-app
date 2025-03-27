@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "228146983256",
+    "firebase_url": "https://stonka-shop-app-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "stonka-shop-app",
     "storage_bucket": "stonka-shop-app.firebasestorage.app"
   },

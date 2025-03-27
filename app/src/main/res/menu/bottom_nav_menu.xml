@@ -7,6 +7,11 @@
         android:title="@string/title_home" />
 
     <item
+        android:id="@+id/navigation_favorite_store"
+        android:icon="@drawable/baseline_map_24"
+        android:title="@string/title_favorite_store" />
+
+    <item
         android:id="@+id/navigation_shakeomat"
         android:icon="@drawable/baseline_discount_24"
         android:title="@string/title_shakeomat" />
