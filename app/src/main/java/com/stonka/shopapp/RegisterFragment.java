@@ -46,8 +46,7 @@ public class RegisterFragment extends Fragment {
 
         mAuth = FirebaseAuth.getInstance();
         databaseReference =
-                FirebaseDatabase.getInstance("https://stonka-shop-app-default-rtdb.europe-west1.firebasedatabase.app/")
-                        .getReference("users");
+                FirebaseDatabase.getInstance().getReference("users");
 
         nameRegister = root.findViewById(R.id.nameRegister);
         birthDateRegister = root.findViewById(R.id.birthDateRegister);

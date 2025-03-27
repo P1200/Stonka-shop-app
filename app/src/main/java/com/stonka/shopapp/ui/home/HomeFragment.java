@@ -102,9 +102,8 @@ public class HomeFragment extends Fragment {
     private void loadMoreProducts() {
         if (isLoading || isLastPage) return;
         isLoading = true;
-        databaseReference =
-                FirebaseDatabase.getInstance("https://stonka-shop-app-default-rtdb.europe-west1.firebasedatabase.app/")
-                        .getReference("products");
+        databaseReference = FirebaseDatabase.getInstance()
+                                            .getReference("products");
 
         Query query;
         if (lastKey == null) {
