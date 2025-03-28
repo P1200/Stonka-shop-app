@@ -53,4 +53,8 @@ dependencies {
 
     implementation libs.osmdroid.android
     implementation libs.osmbonuspack
+
+    implementation libs.android.mail
+    implementation libs.android.activation
+
 }
