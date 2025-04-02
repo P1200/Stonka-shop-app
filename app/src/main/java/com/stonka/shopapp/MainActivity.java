@@ -19,11 +19,11 @@ import androidx.navigation.ui.NavigationUI;
 import com.stonka.shopapp.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    private static final float SHAKE_THRESHOLD = 12.0f;
 
     private ActivityMainBinding binding;
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private static final float SHAKE_THRESHOLD = 12.0f;
     private long lastShakeTime = 0;
 
     @Override
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -66,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onPause() {
         super.onPause();
-        // Wyrejestrowanie nasłuchiwania czujnika
         sensorManager.unregisterListener(this);
     }
 
@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void openShakeomat() {
-        // Tutaj można dodać dowolną akcję, np. otwarcie nowej aktywności
         Intent intent = new Intent(this, ShakeomatActivity.class);
         startActivity(intent);
     }
