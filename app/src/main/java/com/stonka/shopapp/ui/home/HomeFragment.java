@@ -1,7 +1,9 @@
 package com.stonka.shopapp.ui.home;
+import com.stonka.shopapp.ShoppingListActivity;
 import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
 
 import android.graphics.Canvas;
@@ -38,12 +40,12 @@ public class HomeFragment extends Fragment {
 
     private static final int PAGE_SIZE = 5;
     private final List<Product> productList = new ArrayList<>();
+
     private FragmentHomeBinding binding;
     private RecyclerView recyclerView;
     private ProductAdapter adapter;
     private boolean isLoading = false;
     private boolean isLastPage = false;
-
     private String lastKey = null;
     private DatabaseReference databaseReference;
 
@@ -59,8 +61,11 @@ public class HomeFragment extends Fragment {
         adapter = new ProductAdapter(productList);
         recyclerView.setAdapter(adapter);
 
-        binding.btnDownloadPdf.setOnClickListener(v -> {
-            generateProductCatalogPDF();
+        binding.btnDownloadPdf.setOnClickListener(v -> generateProductCatalogPDF());
+
+        binding.btnShoppingList.setOnClickListener(e -> {
+            Intent intent = new Intent(requireActivity(), ShoppingListActivity.class);
+            startActivity(intent);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
