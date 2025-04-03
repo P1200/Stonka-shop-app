@@ -10,7 +10,6 @@ public class ShakeomatViewModel extends ViewModel {
 
     public ShakeomatViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
     }
 
     public LiveData<String> getText() {
