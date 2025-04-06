@@ -1,6 +1,8 @@
 [versions]
-agp = "8.8.2"
+agp = "8.9.0"
+android = "3.0.1"
 androidMail = "1.6.2"
+core = "3.3.3"
 facebookAndroidSdk = "18.0.2"
 firebaseBom = "33.10.0"
 firebaseDatabase = "21.0.0"
@@ -18,10 +20,13 @@ navigationUi = "2.6.0"
 activity = "1.8.0"
 osmbonuspack = "6.8.0"
 osmdroidAndroid = "6.1.16"
+qrgenearator = "1.0.4"
 
 [libraries]
+android = { module = "com.github.kenglxn.QRGen:android", version.ref = "android" }
 android-activation = { module = "com.sun.mail:android-activation", version.ref = "androidMail" }
 android-mail = { module = "com.sun.mail:android-mail", version.ref = "androidMail" }
+core = { module = "com.google.zxing:core", version.ref = "core" }
 facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database", version.ref = "firebaseDatabase" }
@@ -39,6 +44,7 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+qrgenearator = { module = "androidmads.library.qrgenearator:QRGenearator", version.ref = "qrgenearator" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

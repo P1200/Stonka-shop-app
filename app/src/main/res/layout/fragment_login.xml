@@ -29,6 +29,13 @@
         android:text="Zaloguj się"/>
 
     <Button
+        android:id="@+id/generateQrButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generuj kod QR"
+        android:layout_marginTop="8dp"/>
+
+    <Button
         android:id="@+id/forgotPasswordButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
