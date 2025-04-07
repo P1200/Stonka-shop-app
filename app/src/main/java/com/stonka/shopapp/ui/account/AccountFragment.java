@@ -1,5 +1,6 @@
 package com.stonka.shopapp.ui.account;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,9 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -17,6 +20,8 @@ import androidx.navigation.Navigation;
 import com.google.firebase.auth.FirebaseAuth;
 import com.stonka.shopapp.R;
 import com.stonka.shopapp.databinding.FragmentAccountBinding;
+
+import net.glxn.qrgen.android.QRCode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,13 +53,16 @@ public class AccountFragment extends Fragment {
 
         final EditText messageInput = binding.textInput;
         final Button sendMessageButton = binding.sendButton;
+        final Button generateQrButton = binding.generateQrButton;
 
         if (firebaseAuth.getCurrentUser() == null) {
             messageInput.setVisibility(View.GONE);
             sendMessageButton.setVisibility(View.GONE);
+            generateQrButton.setVisibility(View.GONE);
         }
 
         sendMessageButton.setOnClickListener(event -> sendMailMessage(messageInput, root));
+        generateQrButton.setOnClickListener(v -> generateQrCode());
 
         loginButton = root.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(event -> {
@@ -155,5 +163,44 @@ public class AccountFragment extends Fragment {
                         return new PasswordAuthentication(emailAddress, password);
                     }
                 });
+    }
+
+    private void generateQrCode() {
+        String userId = mAuth.getUid();
+
+        if (userId == null || userId.isEmpty()) {
+            Log.e("UserQrCode", "There is no user id");
+            return;
+        }
+
+        try {
+            Bitmap qrBitmap = QRCode.from(userId)
+                    .withSize(500, 500)
+                    .bitmap();
+
+            showQrDialog(qrBitmap);
+        } catch (Exception e) {
+            showToast("Błąd generowania QR: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void showQrDialog(Bitmap qrBitmap) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Twój kod QR");
+        builder.setMessage("Pokaż go przy kasie");
+
+        ImageView imageView = new ImageView(requireContext());
+        imageView.setImageBitmap(qrBitmap);
+        builder.setView(imageView);
+
+        builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
 }

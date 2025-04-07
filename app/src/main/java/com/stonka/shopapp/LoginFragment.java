@@ -1,97 +1,86 @@
 package com.stonka.shopapp;
 
-import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
-import net.glxn.qrgen.android.QRCode;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.stonka.shopapp.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
-
-    private Button generateQrButton;
+    private EditText emailLogin, passwordLogin;
+    private Button loginButton, goToRegister, forgotPasswordButton;
+    private FirebaseAuth mAuth;
+    View root;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        generateQrButton = view.findViewById(R.id.generateQrButton);
-        generateQrButton.setOnClickListener(v -> generateQrCode());
+        FragmentLoginBinding binding = FragmentLoginBinding.inflate(inflater, container, false);
+        root = binding.getRoot();
 
-        return view;
+        mAuth = FirebaseAuth.getInstance();
+        emailLogin = root.findViewById(R.id.emailLogin);
+        passwordLogin = root.findViewById(R.id.passwordLogin);
+        loginButton = root.findViewById(R.id.loginButton);
+        goToRegister = root.findViewById(R.id.goToRegister);
+
+        loginButton.setOnClickListener(v -> loginUser());
+        goToRegister.setOnClickListener(v -> {
+            NavController navController =
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.registerFragment);
+        });
+
+        forgotPasswordButton = root.findViewById(R.id.forgotPasswordButton);
+        forgotPasswordButton.setOnClickListener(v -> {
+            NavController navController =
+                    Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.resetPasswordFragment);
+        });
+
+        return root;
     }
 
-    private void generateQrCode() {
-        String email = getEmailFromConfig();
+    private void loginUser() {
+        String email = emailLogin.getText().toString().trim();
+        String password = passwordLogin.getText().toString().trim();
 
-        if (email == null || email.isEmpty()) {
-            showToast("Nie znaleziono adresu email w konfiguracji");
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(root.getContext(), "Podaj email i hasło!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
-            Bitmap qrBitmap = QRCode.from(email)
-                    .withSize(500, 500)
-                    .bitmap();
-
-            showQrDialog(qrBitmap, email);
-        } catch (Exception e) {
-            showToast("Błąd generowania QR: " + e.getMessage());
-            e.printStackTrace();
-        }
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(requireActivity(), task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null && user.isEmailVerified()) {
+                            Toast.makeText(root.getContext(), "Logowanie udane!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(root.getContext(), MainActivity.class));
+                        } else {
+                            Toast.makeText(root.getContext(),
+                                    "Musisz potwierdzić swój e-mail. Sprawdź swoją skrzynkę pocztową.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(root.getContext(), "Błędny login lub hasło!", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
-    private String getEmailFromConfig() {
-        try {
-            Resources resources = getResources();
-            InputStream inputStream = resources.openRawResource(R.raw.config);
-
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            inputStream.close();
-
-            return properties.getProperty("EMAIL_ADDRESS");
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-            showToast("Nie znaleziono pliku konfiguracyjnego");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showToast("Błąd odczytu pliku konfiguracyjnego");
-        }
-        return null;
-    }
-
-    private void showQrDialog(Bitmap qrBitmap, String email) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Twój kod QR");
-        builder.setMessage("Wygenerowano dla: " + email);
-
-        ImageView imageView = new ImageView(requireContext());
-        imageView.setImageBitmap(qrBitmap);
-        builder.setView(imageView);
-
-        builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-    }
 }

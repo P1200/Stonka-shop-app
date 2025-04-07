@@ -34,8 +34,8 @@ android {
 
 dependencies {
 
-    implementation 'com.github.kenglxn.QRGen:android:3.0.1'
-    implementation 'com.facebook.android:facebook-android-sdk:16.2.0'
+    implementation libs.android
+    implementation libs.facebook.android.sdk.v1620
     implementation libs.core
     implementation libs.appcompat
     implementation libs.material
