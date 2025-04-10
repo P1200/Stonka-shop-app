@@ -2,24 +2,29 @@
 agp = "8.8.2"
 android = "3.0.1"
 androidMail = "1.6.2"
-core = "3.3.3"
-facebookAndroidSdkVersion = "16.2.0"
-firebaseBom = "33.10.0"
+core = "3.5.1"
+facebookAndroidSdkVersion = "18.0.2"
+firebaseBom = "33.12.0"
 firebaseDatabase = "21.0.0"
 firebaseUiAuth = "7.2.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
-appcompat = "1.6.1"
-material = "1.10.0"
-constraintlayout = "2.1.4"
-lifecycleLivedataKtx = "2.6.1"
-lifecycleViewmodelKtx = "2.6.1"
-navigationFragment = "2.6.0"
-navigationUi = "2.6.0"
-activity = "1.8.0"
+appcompat = "1.7.0"
+material = "1.12.0"
+constraintlayout = "2.2.1"
+lifecycleLivedataKtx = "2.8.7"
+lifecycleViewmodelKtx = "2.8.7"
+monitor = "1.5.0"
+navigationFragment = "2.8.9"
+navigationUi = "2.8.9"
+activity = "1.10.1"
 osmbonuspack = "6.8.0"
 osmdroidAndroid = "6.1.16"
+testCore = "1.5.0"
+testRules = "1.5.0"
+testMonitor = "1.5.0"
+testRunner = "1.5.2"
 
 [libraries]
 android = { module = "com.github.kenglxn.QRGen:android", version.ref = "android" }
@@ -38,11 +43,17 @@ material = { group = "com.google.android.material", name = "material", version.r
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+monitor = { module = "androidx.test:monitor", version.ref = "monitor" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
+test-core = { group = "androidx.test", name = "core", version.ref = "testCore" }
+test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
+test-monitor = { group = "androidx.test", name = "monitor", version.ref = "testMonitor" }
+test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
