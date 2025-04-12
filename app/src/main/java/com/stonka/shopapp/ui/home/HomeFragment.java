@@ -1,5 +1,6 @@
 package com.stonka.shopapp.ui.home;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
@@ -16,7 +17,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,7 +43,6 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private static final int PAGE_SIZE = 5;
-    private static final int REQUEST_CODE_SCAN_QR = 1001;  // Zmienna do rozróżniania wyników skanowania
 
     private final List<Product> productList = new ArrayList<>();
     private FragmentHomeBinding binding;
@@ -49,6 +52,32 @@ public class HomeFragment extends Fragment {
     private boolean isLastPage = false;
     private String lastKey = null;
     private DatabaseReference databaseReference;
+    private ActivityResultLauncher<Intent> qrScanLauncher;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        qrScanLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            String qrCode = data.getStringExtra("SCAN_RESULT");
+
+                            if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
+                                new AlertDialog.Builder(getActivity())
+                                        .setTitle("Informacje o produkcie")
+                                        .setMessage(qrCode)
+                                        .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                                        .show();
+                            }
+                        }
+                    }
+                }
+        );
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -68,10 +97,9 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        // Przycisk do uruchomienia skanera QR
         binding.btnScanQR.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), CaptureActivity.class);
-            startActivityForResult(intent, REQUEST_CODE_SCAN_QR);
+            qrScanLauncher.launch(intent);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -98,7 +126,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        loadMoreProducts(); // Ładowanie pierwszej strony
+        loadMoreProducts(); // Load first page
 
         return root;
     }
@@ -142,7 +170,7 @@ public class HomeFragment extends Fragment {
 
                 lastKey = newLastKey;
                 productList.addAll(newProducts);
-                adapter.notifyDataSetChanged(); // Aktualizacja adaptera
+                adapter.notifyDataSetChanged();
 
                 isLoading = false;
             }
@@ -201,16 +229,5 @@ public class HomeFragment extends Fragment {
 
         pdfDocument.finishPage(page);
         return pdfDocument;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SCAN_QR && resultCode == android.app.Activity.RESULT_OK) {
-            // Wynik skanowania
-            String qrCode = data.getStringExtra("SCAN_RESULT");
-            // Obsłuż wynik (np. wyświetl komunikat)
-            Toast.makeText(getContext(), "Skanowany QR: " + qrCode, Toast.LENGTH_SHORT).show();
-        }
     }
 }

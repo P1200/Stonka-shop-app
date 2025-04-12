@@ -23,9 +23,9 @@ osmbonuspack = "6.8.0"
 osmdroidAndroid = "6.1.16"
 testCore = "1.5.0"
 testRules = "1.5.0"
-testMonitor = "1.5.0"
 testRunner = "1.5.2"
 zxingAndroidEmbedded = "4.3.0"
+zxingAndroidEmbeddedVersion = "4.1.0"
 
 [libraries]
 android = { module = "com.github.kenglxn.QRGen:android", version.ref = "android" }
@@ -52,9 +52,9 @@ osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version.ref = "osm
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }
 test-core = { group = "androidx.test", name = "core", version.ref = "testCore" }
 test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
-test-monitor = { group = "androidx.test", name = "monitor", version.ref = "testMonitor" }
 test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
+zxing-android-embedded-v410 = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbeddedVersion" }
 
 
 [plugins]
