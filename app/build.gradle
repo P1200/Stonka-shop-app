@@ -40,7 +40,8 @@ android {
 }
 
 dependencies {
-
+    implementation libs.zxing.android.embedded
+    implementation libs.zxing.android.embedded.v410
     implementation libs.android
     implementation libs.facebook.android.sdk.v1620
     implementation libs.core

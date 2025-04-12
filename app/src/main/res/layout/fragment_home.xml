@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <!-- Shopping list button -->
     <Button
@@ -15,16 +14,31 @@
         android:backgroundTint="@android:color/holo_blue_dark"
         android:text="Lista zakupów" />
 
+    <!-- Scan QR button -->
+    <Button
+        android:id="@+id/btnScanQR"
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnShoppingList"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@android:color/holo_green_dark"
+        android:text="Skanuj kod QR" />
+
     <!-- Download PDF button -->
     <Button
         android:id="@+id/btnDownloadPdf"
         android:layout_width="340dp"
         android:layout_height="wrap_content"
+        android:layout_below="@id/btnScanQR"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_below="@+id/btnShoppingList"
         android:backgroundTint="@android:color/holo_blue_dark"
         android:text="Pobierz PDF" />
 
@@ -33,10 +47,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/btnDownloadPdf"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/btnDownloadPdf"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="0dp" />
 </RelativeLayout>

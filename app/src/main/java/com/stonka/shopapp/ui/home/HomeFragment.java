@@ -1,11 +1,9 @@
 package com.stonka.shopapp.ui.home;
-import com.stonka.shopapp.ShoppingListActivity;
-import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
@@ -19,7 +17,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +31,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.journeyapps.barcodescanner.CaptureActivity;
+import com.stonka.shopapp.ShoppingListActivity;
+import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,8 +43,8 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private static final int PAGE_SIZE = 5;
-    private final List<Product> productList = new ArrayList<>();
 
+    private final List<Product> productList = new ArrayList<>();
     private FragmentHomeBinding binding;
     private RecyclerView recyclerView;
     private ProductAdapter adapter;
@@ -48,7 +52,32 @@ public class HomeFragment extends Fragment {
     private boolean isLastPage = false;
     private String lastKey = null;
     private DatabaseReference databaseReference;
+    private ActivityResultLauncher<Intent> qrScanLauncher;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        qrScanLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            String qrCode = data.getStringExtra("SCAN_RESULT");
+
+                            if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
+                                new AlertDialog.Builder(getActivity())
+                                        .setTitle("Informacje o produkcie")
+                                        .setMessage(qrCode)
+                                        .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                                        .show();
+                            }
+                        }
+                    }
+                }
+        );
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -66,6 +95,11 @@ public class HomeFragment extends Fragment {
         binding.btnShoppingList.setOnClickListener(e -> {
             Intent intent = new Intent(requireActivity(), ShoppingListActivity.class);
             startActivity(intent);
+        });
+
+        binding.btnScanQR.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), CaptureActivity.class);
+            qrScanLauncher.launch(intent);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -92,11 +126,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        loadMoreProducts(); //Load first page
+        loadMoreProducts(); // Load first page
 
         return root;
     }
-
 
     @Override
     public void onDestroyView() {
@@ -108,7 +141,7 @@ public class HomeFragment extends Fragment {
         if (isLoading || isLastPage) return;
         isLoading = true;
         databaseReference = FirebaseDatabase.getInstance()
-                                            .getReference("products");
+                .getReference("products");
 
         Query query;
         if (lastKey == null) {
@@ -137,21 +170,20 @@ public class HomeFragment extends Fragment {
 
                 lastKey = newLastKey;
                 productList.addAll(newProducts);
-                adapter.notifyDataSetChanged(); //Update adapter
+                adapter.notifyDataSetChanged();
 
                 isLoading = false;
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Firebase", "Download data error: " + error.getMessage());
+                Log.e("Firebase", "Błąd pobierania danych: " + error.getMessage());
                 isLoading = false;
             }
         });
     }
 
     private void generateProductCatalogPDF() {
-
         PdfDocument pdfDocument = getPdfDocument();
 
         ContentValues values = new ContentValues();
