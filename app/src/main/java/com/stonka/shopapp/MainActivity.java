@@ -5,10 +5,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        checkNotificationPermissionAndRedirect(this);
         scheduleDailyNotification(this);
     }
 
@@ -43,6 +46,17 @@ public class MainActivity extends AppCompatActivity {
         return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
+    public void checkNotificationPermissionAndRedirect(Context context) {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+            // Powiadomienia są wyłączone – otwórz ustawienia aplikacji
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
+
+            // Uruchom ustawienia
+            context.startActivity(intent);
+        }
+    }
     private void scheduleDailyNotification(Context context) {
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
@@ -54,8 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        long firstTriggerTime = System.currentTimeMillis() + 1000;
-        long repeatInterval = 10 * 1000;
+        long firstTriggerTime = System.currentTimeMillis();
+        long repeatInterval = 60 * 1000;
 
         alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
