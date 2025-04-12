@@ -1,11 +1,8 @@
 package com.stonka.shopapp.ui.home;
-import com.stonka.shopapp.ShoppingListActivity;
-import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
@@ -30,6 +27,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.journeyapps.barcodescanner.CaptureActivity;
+import com.stonka.shopapp.ShoppingListActivity;
+import com.stonka.shopapp.databinding.FragmentHomeBinding;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,8 +39,9 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     private static final int PAGE_SIZE = 5;
-    private final List<Product> productList = new ArrayList<>();
+    private static final int REQUEST_CODE_SCAN_QR = 1001;  // Zmienna do rozróżniania wyników skanowania
 
+    private final List<Product> productList = new ArrayList<>();
     private FragmentHomeBinding binding;
     private RecyclerView recyclerView;
     private ProductAdapter adapter;
@@ -48,7 +49,6 @@ public class HomeFragment extends Fragment {
     private boolean isLastPage = false;
     private String lastKey = null;
     private DatabaseReference databaseReference;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -66,6 +66,12 @@ public class HomeFragment extends Fragment {
         binding.btnShoppingList.setOnClickListener(e -> {
             Intent intent = new Intent(requireActivity(), ShoppingListActivity.class);
             startActivity(intent);
+        });
+
+        // Przycisk do uruchomienia skanera QR
+        binding.btnScanQR.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), CaptureActivity.class);
+            startActivityForResult(intent, REQUEST_CODE_SCAN_QR);
         });
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -92,11 +98,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        loadMoreProducts(); //Load first page
+        loadMoreProducts(); // Ładowanie pierwszej strony
 
         return root;
     }
-
 
     @Override
     public void onDestroyView() {
@@ -108,7 +113,7 @@ public class HomeFragment extends Fragment {
         if (isLoading || isLastPage) return;
         isLoading = true;
         databaseReference = FirebaseDatabase.getInstance()
-                                            .getReference("products");
+                .getReference("products");
 
         Query query;
         if (lastKey == null) {
@@ -137,21 +142,20 @@ public class HomeFragment extends Fragment {
 
                 lastKey = newLastKey;
                 productList.addAll(newProducts);
-                adapter.notifyDataSetChanged(); //Update adapter
+                adapter.notifyDataSetChanged(); // Aktualizacja adaptera
 
                 isLoading = false;
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Firebase", "Download data error: " + error.getMessage());
+                Log.e("Firebase", "Błąd pobierania danych: " + error.getMessage());
                 isLoading = false;
             }
         });
     }
 
     private void generateProductCatalogPDF() {
-
         PdfDocument pdfDocument = getPdfDocument();
 
         ContentValues values = new ContentValues();
@@ -197,5 +201,16 @@ public class HomeFragment extends Fragment {
 
         pdfDocument.finishPage(page);
         return pdfDocument;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_SCAN_QR && resultCode == android.app.Activity.RESULT_OK) {
+            // Wynik skanowania
+            String qrCode = data.getStringExtra("SCAN_RESULT");
+            // Obsłuż wynik (np. wyświetl komunikat)
+            Toast.makeText(getContext(), "Skanowany QR: " + qrCode, Toast.LENGTH_SHORT).show();
+        }
     }
 }
