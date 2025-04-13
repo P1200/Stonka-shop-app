@@ -46,14 +46,13 @@ public class MainActivity extends AppCompatActivity {
         return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
-    public void checkNotificationPermissionAndRedirect(Context context) {
+    private void checkNotificationPermissionAndRedirect(Context context) {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
-            // Powiadomienia są wyłączone – otwórz ustawienia aplikacji
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
 
-            // Uruchom ustawienia
+            // Run settings
             context.startActivity(intent);
         }
     }

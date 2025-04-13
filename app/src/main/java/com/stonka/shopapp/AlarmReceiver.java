@@ -1,6 +1,6 @@
 package com.stonka.shopapp;
 
-
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,8 +15,13 @@ public class AlarmReceiver extends BroadcastReceiver {
         String channelId = "promo_channel";
         String title = "🔥 Promocja dnia!";
         String message = "Sprawdź nowe okazje w naszym sklepie.";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+        NotificationChannel channel = new NotificationChannel(channelId, title, importance);
+        channel.setDescription(message);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.createNotificationChannel(channel);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
