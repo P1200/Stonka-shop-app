@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
             context.startActivity(intent);
         }
     }
+
     private void scheduleDailyNotification(Context context) {
         Intent intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
