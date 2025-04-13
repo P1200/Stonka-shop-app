@@ -38,8 +38,16 @@
                 android:text="cena zł"
                 android:textSize="16sp"/>
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/qr_code_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="top"
+            android:contentDescription="Kod QR produktu" />
     </LinearLayout>
 
+    <!-- separator -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
