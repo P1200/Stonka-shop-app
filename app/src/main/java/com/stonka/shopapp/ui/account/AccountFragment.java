@@ -38,6 +38,7 @@ import javax.mail.internet.MimeMessage;
 
 public class AccountFragment extends Fragment {
 
+    // Inicjalizacja Firebase Auth
     private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private FragmentAccountBinding binding;
     private Button logoutButton;
@@ -48,22 +49,29 @@ public class AccountFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+        // Inflatuj widok przy pomocy View Binding
         binding = FragmentAccountBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Inicjalizacja pól z layoutu
         final EditText messageInput = binding.textInput;
         final Button sendMessageButton = binding.sendButton;
         final Button generateQrButton = binding.generateQrButton;
 
+        // Ukryj pola, jeśli użytkownik nie jest zalogowany
         if (firebaseAuth.getCurrentUser() == null) {
             messageInput.setVisibility(View.GONE);
             sendMessageButton.setVisibility(View.GONE);
             generateQrButton.setVisibility(View.GONE);
         }
 
+        // Ustawienie listenera do wysyłania wiadomości
         sendMessageButton.setOnClickListener(event -> sendMailMessage(messageInput, root));
+
+        // Listener do generowania kodu QR
         generateQrButton.setOnClickListener(v -> generateQrCode());
 
+        // Przycisk logowania – przechodzi do fragmentu logowania
         loginButton = root.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(event -> {
             NavController navController =
@@ -71,6 +79,7 @@ public class AccountFragment extends Fragment {
             navController.navigate(R.id.loginFragment);
         });
 
+        // Przycisk wylogowania – wylogowuje użytkownika i przekierowuje do logowania
         mAuth = FirebaseAuth.getInstance();
         logoutButton = root.findViewById(R.id.logoutButton);
         logoutButton.setOnClickListener(v -> {
@@ -87,6 +96,7 @@ public class AccountFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // Sprawdzenie, czy użytkownik jest zalogowany – odpowiednie pokazanie przycisków
         if (mAuth.getCurrentUser() != null) {
             loginButton.setVisibility(View.GONE);
             logoutButton.setVisibility(View.VISIBLE);
@@ -99,52 +109,60 @@ public class AccountFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Zapobiega wyciekom pamięci
     }
 
+    // Metoda do wysyłania wiadomości email
     private void sendMailMessage(EditText messageInput, View root) {
-        Properties props = getMailProperties();
+        Properties props = getMailProperties(); // Konfiguracja serwera SMTP
 
+        // Wykonanie wysyłki w osobnym wątku
         Executors.newSingleThreadExecutor().execute(() -> {
             try (InputStream input = requireContext().getResources().openRawResource(R.raw.config)) {
+                // Utwórz wiadomość email
                 Message message = getMessage(messageInput, props, input);
-                Transport.send(message);
+                Transport.send(message); // Wyślij wiadomość
 
+                // Pokazanie toastu po sukcesie
                 requireActivity().runOnUiThread(
                         () -> Toast.makeText(root.getContext(), "Wiadomość została wysłana", Toast.LENGTH_SHORT)
-                                    .show()
+                                .show()
                 );
 
-                messageInput.getText()
-                            .clear();
+                messageInput.getText().clear(); // Wyczyść pole tekstowe
 
             } catch (IOException | MessagingException e) {
+                // Obsługa błędu
                 Log.e("HELP_MAIL", e.toString());
                 requireActivity().runOnUiThread(
                         () -> Toast.makeText(root.getContext(), "Nie udało się wysłać wiadomości. Przepraszamy", Toast.LENGTH_SHORT)
-                                    .show()
+                                .show()
                 );
             }
         });
     }
 
+    // Tworzy obiekt wiadomości email
     @NonNull
     private Message getMessage(EditText messageInput, Properties props, InputStream input) throws IOException, MessagingException {
-        props.load(input);
+        props.load(input); // Wczytaj dane z pliku konfiguracyjnego
         String password = props.getProperty("EMAIL_PASSWORD");
         String emailAddress = props.getProperty("EMAIL_ADDRESS");
         String recipientAddress = props.getProperty("EMAIL_RECEPIENT");
 
+        // Utwórz sesję pocztową
         Session session = getMailSession(props, emailAddress, password);
 
+        // Utwórz obiekt wiadomości
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(emailAddress));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientAddress));
-        message.setSubject(firebaseAuth.getCurrentUser().getUid());
-        message.setText(messageInput.getText().toString());
+        message.setSubject(firebaseAuth.getCurrentUser().getUid()); // UID jako temat
+        message.setText(messageInput.getText().toString()); // Treść wiadomości
         return message;
     }
 
+    // Konfiguracja SMTP dla Gmaila
     @NonNull
     private static Properties getMailProperties() {
         Properties props = new Properties();
@@ -155,6 +173,7 @@ public class AccountFragment extends Fragment {
         return props;
     }
 
+    // Utworzenie sesji mailowej z uwierzytelnieniem
     @NonNull
     private static Session getMailSession(Properties props, String emailAddress, String password) {
         return Session.getInstance(props,
@@ -165,6 +184,7 @@ public class AccountFragment extends Fragment {
                 });
     }
 
+    // Generuje kod QR na podstawie UID użytkownika
     private void generateQrCode() {
         String userId = mAuth.getUid();
 
@@ -174,32 +194,35 @@ public class AccountFragment extends Fragment {
         }
 
         try {
+            // Wygenerowanie bitmapy z kodem QR
             Bitmap qrBitmap = QRCode.from(userId)
                     .withSize(500, 500)
                     .bitmap();
 
-            showQrDialog(qrBitmap);
+            showQrDialog(qrBitmap); // Pokaż QR w dialogu
         } catch (Exception e) {
             showToast("Błąd generowania QR: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    // Pokazuje okno dialogowe z kodem QR
     private void showQrDialog(Bitmap qrBitmap) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Twój kod QR");
         builder.setMessage("Pokaż go przy kasie");
 
         ImageView imageView = new ImageView(requireContext());
-        imageView.setImageBitmap(qrBitmap);
+        imageView.setImageBitmap(qrBitmap); // Ustawienie obrazka
         builder.setView(imageView);
 
         builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
-        dialog.show();
+        dialog.show(); // Wyświetlenie dialogu
     }
 
+    // Pokazuje krótki komunikat typu toast
     private void showToast(String message) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
     }
