@@ -69,3 +69,28 @@ dependencies {
     androidTestImplementation(libs.test.rules)
     androidTestImplementation(libs.test.runner)
 }
+
+tasks.register('androidJavadoc', Javadoc) {
+    def variant = android.applicationVariants.find { it.name == "release" }
+
+    if (variant != null) {
+        source = variant.javaCompileProvider.get().source
+
+        classpath += files(android.getBootClasspath())
+        classpath += variant.javaCompileProvider.get().classpath
+
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+        failOnError = false
+
+        exclude '**/module-info.java'
+        exclude '**/*.kt'
+
+        doFirst {
+            println "Javadoc classpath:"
+            classpath.files.each { println it }
+        }
+    } else {
+        println "Nie znaleziono wariantu release"
+    }
+}
